@@ -9,3 +9,6 @@
 
 # Archivos temporales de editores
 *.tmp
+
+# Evidencias (capturas de bitácora)
+tareas/evidencias/
