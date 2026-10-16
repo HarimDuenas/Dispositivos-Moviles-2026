@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../model/incidencia.dart';
 import '../services/gestor_incidencias.dart';
+import 'colores.dart';
 import 'pantalla_detalle.dart';
 import 'pantalla_nueva.dart';
 
@@ -40,11 +41,6 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
     if (estado == 'Resuelta') return const Color(0xFF147D64);
     if (estado == 'En proceso') return const Color(0xFFB56B13);
     return const Color(0xFFAC4052);
-  }
-  Color colorPrioridad(String prioridad) {
-    if (prioridad == 'Alta') return const Color(0xFF174C83);
-    if (prioridad == 'Media') return const Color(0xFF5B7FA6);
-    return const Color(0xFF8A96A3);
   }
 
   Widget resumen(String etiqueta, String valor, IconData icono) {

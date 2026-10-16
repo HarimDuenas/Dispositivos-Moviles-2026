@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../model/incidencia.dart';
 import '../services/gestor_incidencias.dart';
+import 'colores.dart';
 
 class PantallaDetalle extends StatefulWidget {
   final GestorIncidencias gestor;
@@ -96,6 +97,7 @@ class _PantallaDetalleState extends State<PantallaDetalle> {
                     SegmentedButton<String>(
                       segments: Incidencia.prioridades.map((p) => ButtonSegment(value: p, label: Text(p))).toList(),
                       selected: {item.prioridad},
+                      style: estiloPrioridad(item.prioridad),
                       onSelectionChanged: guardando ? null : (s) => cambiarPrioridad(s.first),
                     ),
                     if (guardando) const Padding(
