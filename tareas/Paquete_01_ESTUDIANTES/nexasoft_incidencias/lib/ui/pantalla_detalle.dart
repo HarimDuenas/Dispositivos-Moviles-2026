@@ -93,7 +93,9 @@ class _PantallaDetalleState extends State<PantallaDetalle> {
                           .toList(),
                       onChanged: guardando ? null : cambiar,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 15),
+                    const Text('Nivel de prioridad:', style: TextStyle(fontSize: 16)),
+                    const SizedBox(height: 10),
                     SegmentedButton<String>(
                       segments: Incidencia.prioridades.map((p) => ButtonSegment(value: p, label: Text(p))).toList(),
                       selected: {item.prioridad},
