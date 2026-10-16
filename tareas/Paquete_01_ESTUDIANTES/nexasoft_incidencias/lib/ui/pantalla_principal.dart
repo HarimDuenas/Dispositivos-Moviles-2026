@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../model/incidencia.dart';
 import '../services/gestor_incidencias.dart';
+import 'colores.dart';
 import 'pantalla_detalle.dart';
 import 'pantalla_nueva.dart';
 
@@ -190,6 +191,8 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                                               Text(item.estado, style: TextStyle(
                                                 color: colorEstado(item.estado), fontWeight: FontWeight.bold,
                                               )),
+                                              Text(item.prioridad, style: TextStyle(
+                                                color: colorPrioridad(item.prioridad), fontWeight: FontWeight.bold,)),
                                             ],
                                           ),
                                         ),

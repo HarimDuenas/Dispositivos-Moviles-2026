@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../model/incidencia.dart';
 import '../services/gestor_incidencias.dart';
+import 'colores.dart';
 
 class PantallaNueva extends StatefulWidget {
   final GestorIncidencias gestor;
@@ -16,6 +18,7 @@ class _PantallaNuevaState extends State<PantallaNueva> {
   final cliente = TextEditingController();
   String categoria = 'Software';
   bool ocupado = false;
+  String prioridad = 'Media';
 
   @override
   void dispose() {
@@ -30,7 +33,7 @@ class _PantallaNuevaState extends State<PantallaNueva> {
     setState(() => ocupado = true);
     try {
       await widget.gestor.crear(
-        titulo.text.trim(), descripcion.text.trim(), cliente.text.trim(), categoria,
+        titulo.text.trim(), descripcion.text.trim(), cliente.text.trim(), categoria, prioridad,
       );
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
@@ -77,6 +80,15 @@ class _PantallaNuevaState extends State<PantallaNueva> {
                   items: ['Software', 'Hardware', 'Redes']
                       .map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                   onChanged: ocupado ? null : (v) => setState(() => categoria = v ?? 'Software'),
+                ),
+                const SizedBox(height: 15),
+                const Text('Nivel de prioridad:', style: TextStyle(fontSize: 16)),
+                const SizedBox(height: 15),
+                SegmentedButton<String>(
+                  segments: Incidencia.prioridades.map((p) => ButtonSegment(value: p, label: Text(p))).toList(),
+                  selected: {prioridad},
+                  style: estiloPrioridad(prioridad),
+                  onSelectionChanged: ocupado ? null : (s) => setState(() => prioridad = s.first),
                 ),
                 const SizedBox(height: 24),
                 FilledButton.icon(
