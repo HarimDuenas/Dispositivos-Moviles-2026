@@ -17,11 +17,21 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
   bool cargando = true;
   String? error;
   String busqueda = '';
+  String? filtroEstado;
+  String? filtroPrioridad;
+  final TextEditingController buscador = TextEditingController();
+  static const estados = ['Pendiente', 'En proceso', 'Resuelta'];
 
   @override
   void initState() {
     super.initState();
     cargar();
+  }
+
+  @override
+  void dispose() {
+    buscador.dispose();
+    super.dispose();
   }
 
   Future<void> cargar() async {
@@ -83,9 +93,106 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
     }
   }
 
+  void limpiarTodo() {
+    buscador.clear();
+    setState(() {
+      busqueda = '';
+      filtroEstado = null;
+      filtroPrioridad = null;
+    });
+  }
+
+  Widget grupoFiltro(String titulo, List<String> opciones, String? actual,
+      Color Function(String) color, void Function(String?) alElegir) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final opcion in <String?>[null, ...opciones])
+              ChoiceChip(
+                label: Text(opcion ?? (titulo == 'Estado' ? 'Todos' : 'Todas')),
+                selected: actual == opcion,
+                selectedColor: opcion == null ? null : color(opcion).withValues(alpha: 0.2),
+                onSelected: (_) => alElegir(opcion),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> abrirFiltros() {
+    return showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Cerrar filtros',
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (ctx, _, __) => Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Material(
+            elevation: 8,
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+            child: StatefulBuilder(
+              builder: (ctx, setPanel) => Padding(
+                padding: const EdgeInsets.all(20),
+                child: Stack(
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          height: 48,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text('Filtros', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                        grupoFiltro('Estado', estados, filtroEstado, colorEstado, (e) {
+                          setState(() => filtroEstado = e);
+                          setPanel(() {});
+                        }),
+                        const SizedBox(height: 16),
+                        grupoFiltro('Prioridad', Incidencia.prioridades, filtroPrioridad, colorPrioridad, (p) {
+                          setState(() => filtroPrioridad = p);
+                          setPanel(() {});
+                        }),
+                      ],
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: IconButton(
+                        tooltip: 'Cerrar filtros',
+                        onPressed: () => Navigator.pop(ctx),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      transitionBuilder: (ctx, animacion, _, hijo) => SlideTransition(
+        position: Tween(begin: const Offset(0, -1), end: Offset.zero)
+            .animate(CurvedAnimation(parent: animacion, curve: Curves.easeOut)),
+        child: hijo,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final items = g.buscar(busqueda);
+    final items = g.buscar(busqueda, estado: filtroEstado, prioridad: filtroPrioridad);
+    final activos = (filtroEstado != null ? 1 : 0) + (filtroPrioridad != null ? 1 : 0);
     return Scaffold(
       appBar: AppBar(
         title: const Text('NexaSoft | Incidencias'),
@@ -152,6 +259,7 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 5),
                           child: TextField(
+                            controller: buscador,
                             decoration: const InputDecoration(
                               labelText: 'Buscar incidencias',
                               hintText: 'Ejemplo: WiFi, correo, pantalla',
@@ -159,6 +267,41 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                               border: OutlineInputBorder(),
                             ),
                             onChanged: (texto) => setState(() => busqueda = texto),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 5),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Wrap(
+                              spacing: 8,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                OutlinedButton.icon(
+                                  onPressed: abrirFiltros,
+                                  icon: const Icon(Icons.tune),
+                                  label: Text(activos == 0 ? 'Filtros' : 'Filtros ($activos)'),
+                                ),
+                                if (filtroEstado != null)
+                                  InputChip(
+                                    label: Text(filtroEstado!),
+                                    onPressed: abrirFiltros,
+                                    onDeleted: () => setState(() => filtroEstado = null),
+                                  ),
+                                if (filtroPrioridad != null)
+                                  InputChip(
+                                    label: Text(filtroPrioridad!),
+                                    onPressed: abrirFiltros,
+                                    onDeleted: () => setState(() => filtroPrioridad = null),
+                                  ),
+                                if (activos > 0 || busqueda.isNotEmpty)
+                                  TextButton.icon(
+                                    onPressed: limpiarTodo,
+                                    icon: const Icon(Icons.filter_alt_off),
+                                    label: const Text('Limpiar todo'),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                         Padding(
@@ -170,7 +313,13 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                         ),
                         Expanded(
                           child: items.isEmpty
-                              ? const Center(child: Text('No se encontraron incidencias'))
+                              ? Center(
+                                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                    const Text('Ninguna incidencia coincide con la búsqueda y los filtros activos'),
+                                    const SizedBox(height: 12),
+                                    OutlinedButton(onPressed: limpiarTodo, child: const Text('Limpiar todo')),
+                                  ]),
+                                )
                               : ListView.builder(
                                   padding: const EdgeInsets.only(left: 12, right: 12, bottom: 100),
                                   itemCount: items.length,
