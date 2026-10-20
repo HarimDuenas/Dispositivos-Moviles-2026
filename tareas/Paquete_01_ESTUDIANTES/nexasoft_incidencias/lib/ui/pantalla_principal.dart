@@ -285,11 +285,13 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                                 if (filtroEstado != null)
                                   InputChip(
                                     label: Text(filtroEstado!),
+                                    onPressed: abrirFiltros,
                                     onDeleted: () => setState(() => filtroEstado = null),
                                   ),
                                 if (filtroPrioridad != null)
                                   InputChip(
                                     label: Text(filtroPrioridad!),
+                                    onPressed: abrirFiltros,
                                     onDeleted: () => setState(() => filtroPrioridad = null),
                                   ),
                                 if (activos > 0 || busqueda.isNotEmpty)
