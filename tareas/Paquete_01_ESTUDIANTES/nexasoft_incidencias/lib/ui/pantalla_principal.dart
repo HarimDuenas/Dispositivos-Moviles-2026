@@ -133,26 +133,49 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
       transitionDuration: const Duration(milliseconds: 250),
       pageBuilder: (ctx, _, __) => Align(
         alignment: Alignment.topCenter,
-        child: Material(
-          elevation: 8,
-          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-          child: StatefulBuilder(
-            builder: (ctx, setPanel) => Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  grupoFiltro('Estado', estados, filtroEstado, colorEstado, (e) {
-                    setState(() => filtroEstado = e);
-                    setPanel(() {});
-                  }),
-                  const SizedBox(height: 16),
-                  grupoFiltro('Prioridad', Incidencia.prioridades, filtroPrioridad, colorPrioridad, (p) {
-                    setState(() => filtroPrioridad = p);
-                    setPanel(() {});
-                  }),
-                ],
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Material(
+            elevation: 8,
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+            child: StatefulBuilder(
+              builder: (ctx, setPanel) => Padding(
+                padding: const EdgeInsets.all(20),
+                child: Stack(
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          height: 48,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text('Filtros', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                        grupoFiltro('Estado', estados, filtroEstado, colorEstado, (e) {
+                          setState(() => filtroEstado = e);
+                          setPanel(() {});
+                        }),
+                        const SizedBox(height: 16),
+                        grupoFiltro('Prioridad', Incidencia.prioridades, filtroPrioridad, colorPrioridad, (p) {
+                          setState(() => filtroPrioridad = p);
+                          setPanel(() {});
+                        }),
+                      ],
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: IconButton(
+                        tooltip: 'Cerrar filtros',
+                        onPressed: () => Navigator.pop(ctx),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
